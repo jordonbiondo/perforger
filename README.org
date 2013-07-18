@@ -1,4 +1,5 @@
 * Perforger
   Alternative p4 integration, inspired by magit.
 
-  *This is very early in development, don't use it, I don't even understand half of p4 yet.*
+  *This is very early in development, don't use it, I don't even understand half of p4 yet or how to integrate it*
+  

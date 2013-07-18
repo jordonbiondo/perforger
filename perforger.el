@@ -12,7 +12,7 @@
 ;; URL: 
 ;; Doc URL: 
 ;; Keywords: 
-;; Compatibility: 
+;; Compatibility: Emacs 24.x
 ;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
