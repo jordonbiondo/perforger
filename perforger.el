@@ -6,9 +6,9 @@
 ;; Maintainer: Jordon Biondo <biondoj@mail.gvsu.edu>
 ;; Created: Thu Jul 18 12:19:30 2013 (-0400)
 ;; Version: .1
-;; Last-Updated: Thu Jul 18 12:20:04 2013 (-0400)
+;; Last-Updated: Thu Jul 18 12:36:00 2013 (-0400)
 ;;           By: jorbi
-;;     Update #: 1
+;;     Update #: 2
 ;; URL: 
 ;; Doc URL: 
 ;; Keywords: 
@@ -261,6 +261,23 @@ be recreated"
 	       (p4/log t "nothing changed"))
       (p4/log nil (concat "--Exec: " (p4/simple-proc-command proc) "\n"str)))))
 
+(defun p4/update-filter(proc str)
+  "Outputs text to the `p4/log-buffer' in `p4/log-mode' formatting"
+  (if (string-match ".*\\(Unknown command\\|p4 help simple\\).*" str)
+      (p4/log t (concat "--ERROR: Unable to do anything with '"
+			(p4/simple-proc-command proc) "'"))
+    (if (string-match ".*nothing changed.*" str)
+	(progn (p4/log nil (concat "--Exec: " (p4/simple-proc-command proc)))
+	       (p4/log t "nothing changed"))
+      (p4/log nil (concat "--Exec: " (p4/simple-proc-command proc) "\n"
+			  (replace-regexp-in-string " - " "\n\t" str))))))
+
+
+
+
+
+
+
 
 (defun p4/gui()
   "Opens a p4 gui."
@@ -277,7 +294,15 @@ Ex:
   M-x p4/run-like -> run p4 with args: changes -u jorbi -m3 "
   (interactive (list (read-string "run p4 with args: ")))
   (if (listp arg) (setq arg (first arg)))
-  (p4/run-with 'p4/standard-filter nil (split-string arg)))
+  (p4/run-with 'p4/standard-filter nil (split-string arg))
+  (p4/show-log-buffer))
+
+
+(defun p4/update()
+  "Run p4 update on the workspace."
+  (interactive)
+  (p4/run-with 'p4/update-filter nil "update")
+  (p4/show-log-buffer))
 
 
 (defun p4/simple-proc-command(proc)
@@ -295,6 +320,7 @@ Ex:
    '("\\(^Change \\)\\(default\\|[0-9]+\\)" 2 font-lock-preprocessor-face)
    '("\\( by \\)\\([^ ]+\\)\\(@\\)\\([^ ]+\\)" 2 font-lock-type-face)
    '("\\( by \\)\\([^ ]+\\)\\(@\\)\\([^ ]+\\)" 4 font-lock-string-face)
+   '("^\t[a-z]+ as \\<" . font-lock-keyword-face)
    '("\\(^--p4/log\\)\\(\|\\)\\(.*$\\)" 2 font-lock-function-name-face)
    '("\\(^--p4/log\\)\\(|\\)\\(.*$\\)" 3 font-lock-keyword-face)
    '("\\(^--Exec:\\)\\(.*$\\)" 1 font-lock-type-face)
