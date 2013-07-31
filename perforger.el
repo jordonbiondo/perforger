@@ -304,6 +304,64 @@ Ex:
   (p4/run-with 'p4/update-filter nil "update")
   (p4/show-log-buffer))
 
+(defun p4/update-display-only()
+  "show update, don't apply"
+  (interactive)
+  (p4/run-with 'p4/update-filter nil "update" "-n")
+  (p4/show-log-buffer))
+
+
+(defun p4/revert-unchanged-files()
+  "revert -a, removed unchanged files from changelists."
+  (interactive)
+  (if (yes-or-no-p "Are you sure you want to revert all unchanged files?")
+      (p4/run-with 'p4/update-filter nil "revert" "-a")
+    (p4/show-log-buffer)))
+
+
+(defun p4/revert-file(buffer)
+  "Revert buffer file"
+  (interactive "bRevert file: ")
+  (lexical-let ((file (buffer-file-name (get-buffer buffer)))
+		(buffer buffer))
+    (if (and file (file-exists-p file))
+	(p4/run-with (lambda(process str)
+		       (if (string-match "not opened on this client" str)
+			   (progn (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+				  (p4/log t str))
+			 (if (string-match "reverted" str)
+			     (progn 
+			       (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+			       (p4/log t "reverted %s" buffer)
+			       (with-current-buffer buffer
+				 (revert-buffer nil t t)))
+			   (progn (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+				  (p4/log t str)))))
+		     (lambda(process event)
+		       (if (not (zerop (process-exit-status process)))
+			   (p4/log t "Error reverting %s." file)))
+		     "revert" file))))
+
+(defun p4/unopen-file(buffer)
+  "revert -K buffer"
+  (interactive "bUnopen file: ")
+  (lexical-let ((file (buffer-file-name (get-buffer buffer)))
+		(buffer buffer))
+    (if (and file (file-exists-p file))
+	(p4/run-with (lambda(process str)
+		       (if (string-match "not opened on this client" str)
+			   (progn (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+				  (p4/log t str))
+			 (if (string-match "cleared" str)
+			     (progn 
+			       (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+			       (p4/log t "unopened %s, local file kept" buffer))
+			   (progn (p4/log nil (concat "--Exec: " (p4/simple-proc-command process)))
+				  (p4/log t str)))))
+		     (lambda(process event)
+		       (if (not (zerop (process-exit-status process)))
+			   (p4/log t "Error reverting %s." file)))
+		     "revert" "-k" file))))
 
 (defun p4/simple-proc-command(proc)
   "Returns the nice string representation of a process."
