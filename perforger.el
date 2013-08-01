@@ -5,11 +5,11 @@
 ;; Author: Jordon Biondo
 ;; Maintainer: Jordon Biondo <biondoj@mail.gvsu.edu>
 ;; Created: Thu Jul 18 12:19:30 2013 (-0400)
-;; Version: .1
-;; Last-Updated: Thu Jul 18 12:36:00 2013 (-0400)
+;; Version: .102
+;; Last-Updated: Thu Aug  1 12:47:51 2013 (-0400)
 ;;           By: jorbi
-;;     Update #: 2
-;; URL: 
+;;     Update #: 4
+;; URL: www.github.com/jordonbiondo/perforger
 ;; Doc URL: 
 ;; Keywords: 
 ;; Compatibility: Emacs 24.x
@@ -18,7 +18,7 @@
 ;; 
 ;;; Commentary: 
 ;; 
-;; 
+;; P4 integration in Emacs
 ;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
@@ -111,7 +111,8 @@ Use `p4/refresh-info' if you need to update the values")
 	  (p4/run-with 'p4/standard-filter
 		       (lambda(process event)
 			 (if (string-match ".*finished.*" event)
-			     (revert-buffer t t t)
+			     (with-current-buffer synced-buffer
+			       (revert-buffer t t t))
 			   (p4\log t (concat "error syncing "
 					     (buffer-name synced-buffer)))))
 		       (list "sync" "-f" (concat (buffer-file-name) "#head")))))))
